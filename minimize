@@ -3057,7 +3057,7 @@ sub total_dist(@mapping) {
 
 my $sum = total_dist(@mapping);
 my $attempts = 0;
-loop {
+until (now - BEGIN now) > 600 {
     my ($i1, $i2);
     repeat {
         ($i1, $i2) = (^$TOTAL).roll, (^$TOTAL).roll;
@@ -3066,13 +3066,17 @@ loop {
     my @new_mapping = @mapping;
     @new_mapping[$i1, $i2] = @new_mapping[$i2, $i1];
     my $d_new = dist(@new_mapping, $i1) + dist(@new_mapping, $i2);
-    if $d_new < $d_old {
+    my $temperature = (600 + BEGIN { now } - now) / 60;
+    if $d_new < $d_old + rand * $temperature {
         @mapping = @new_mapping;
         $sum += $d_new - $d_old;
-        say "$sum ($failed)";
         $attempts = 0;
     }
     else {
         $attempts++;
     }
 }
+
+my $file = "run-1";
+$file++ while $file.IO ~~ :e;
+spurt $file, $sum ~ "\n\n" ~ join "\n", @mapping;
