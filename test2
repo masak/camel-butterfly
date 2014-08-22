@@ -1,0 +1,68 @@
+my $RING = q:to/EOF/;
+         ###
+       ##   ##
+      #       #
+     #         #
+     #         #
+    #           #
+    #           #
+    #           #
+     #         #
+     #         #
+      #       #
+       ##   ##
+         ###
+    EOF
+
+my $CROSS = q:to/EOF/;
+    ##      ##
+     ##    ##
+      ##  ##
+       ####
+       ####
+      ##  ##
+     ##    ##
+    ##      ##
+    EOF
+
+sub coords($s) {
+    my @coords;
+    for $s.lines.kv -> $y, $l {
+        for $l.comb.kv -> $x, $c {
+            if $c eq '#' {
+                push @coords, [$x, $y];
+            }
+        }
+    }
+    return @coords;
+}
+
+my @ring-coords = coords($RING);
+my @cross-coords = coords($CROSS);
+@cross-coords»[0] »+=» 2;
+@cross-coords»[1] »+=» 4;
+
+sub show(@c1, @c2, $t) {
+    my $mx = max @ring-coords»[0];
+    my $my = max @ring-coords»[1];
+
+    sub interpol($n1, $n2) { $n1 * (1 - $t) + $n2 * $t }
+
+    sub coords_at($x, $y) {
+        grep { $x == round(interpol(@c1[$_][0], @c2[$_][0])) &&
+               $y == round(interpol(@c1[$_][1], @c2[$_][1])) }, ^@c1;
+    }
+
+    for 0..$my -> $y {
+        for 0..$mx -> $x {
+            my @n = coords_at($x, $y);
+            print @n ?? '#' !! ' ';
+        }
+        say '';
+    }
+    say '';
+}
+
+for 0.00, 0.10 ... 1.00 -> $t {
+    show(@ring-coords, @cross-coords, $t);
+}
