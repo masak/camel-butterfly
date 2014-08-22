@@ -3057,7 +3057,7 @@ sub total_dist(@mapping) {
 
 my $sum = total_dist(@mapping);
 my $attempts = 0;
-until (now - BEGIN now) > 600 {
+until (now - BEGIN now) > 1200 {
     my ($i1, $i2);
     repeat {
         ($i1, $i2) = (^$TOTAL).roll, (^$TOTAL).roll;
